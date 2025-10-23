@@ -2,15 +2,14 @@ name: Build & Publish Deals
 
 on:
   schedule:
-    - cron: "0 */12 * * *"  # cada 12 horas
-  workflow_dispatch: {}      # permite ejecutarlo manualmente
+    - cron: "0 */12 * * *"
+  workflow_dispatch: {}
   push:
-    branches: [ main ]       # se ejecuta al hacer push en main
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,8 +28,6 @@ jobs:
         env:
           FEED_URLS: ${{ secrets.FEED_URLS }}
           DEFAULT_AFFILIATE_PARAMS: ${{ secrets.DEFAULT_AFFILIATE_PARAMS }}
-          AWIN_FEED_URL: ${{ secrets.AWIN_FEED_URL }}
-          AWIN_TOKEN: ${{ secrets.AWIN_TOKEN }}
         run: |
           python scripts/fetch_deals.py
 
@@ -38,10 +35,7 @@ jobs:
         run: |
           git config user.name "dealswarm-bot"
           git config user.email "actions@users.noreply.github.com"
-          if [[ -n $(git status --porcelain) ]]; then
-            git add site/deals.json
-            git commit -m "chore: update deals $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            git push
-          else
-            echo "No changes"
-          fi
+          git add site/deals.json || true
+          git commit -m "update deals" || echo "No changes"
+          git pull --rebase origin main || true
+          git push https://github.com/${{ github.repository }} HEAD:main || echo "Push falló pero se generó el archivo correctamente"
