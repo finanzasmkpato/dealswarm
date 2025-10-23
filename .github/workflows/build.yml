@@ -1,1 +1,47 @@
-# placeholder for build.yml
+name: Build & Publish Deals
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # cada 12 horas
+  workflow_dispatch: {}      # permite ejecutarlo manualmente
+  push:
+    branches: [ main ]       # se ejecuta al hacer push en main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate deals.json
+        env:
+          FEED_URLS: ${{ secrets.FEED_URLS }}
+          DEFAULT_AFFILIATE_PARAMS: ${{ secrets.DEFAULT_AFFILIATE_PARAMS }}
+          AWIN_FEED_URL: ${{ secrets.AWIN_FEED_URL }}
+          AWIN_TOKEN: ${{ secrets.AWIN_TOKEN }}
+        run: |
+          python scripts/fetch_deals.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "dealswarm-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if [[ -n $(git status --porcelain) ]]; then
+            git add site/deals.json
+            git commit -m "chore: update deals $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          else
+            echo "No changes"
+          fi
