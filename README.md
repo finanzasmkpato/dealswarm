@@ -1,3 +1,3 @@
-# DEALSWARM — Agregador Multi‑Deals (AppSumo/StackSocial/Awin)
+# DEALSWARM — Sistema automático de ofertas
 
-Agregador 100 % automático: lee feeds oficiales (RSS/CSV), genera `site/deals.json` y publica una landing estática filtrable.
+Crea un agregador 100 % automático de ofertas de AppSumo, StackSocial y otras redes.

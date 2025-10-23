@@ -13,7 +13,7 @@ def parse_feed(url):
             "description": e.get("summary", "") or e.get("description", ""),
             "url": e.get("link", ""),
             "published_at": e.get("published", now_iso()),
-            "network": url.split("/")[2],
+            "network": url.split('/')[2] if '//' in url else url
         })
     print(f"✅ {len(items)} ofertas capturadas de {url}")
     return items
@@ -27,7 +27,6 @@ def main():
         feeds = []
 
     all_items = []
-
     if not feeds:
         print("⚠️ No hay feeds definidos en FEED_URLS. Se generará archivo vacío.")
     else:
